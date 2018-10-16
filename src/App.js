@@ -2,18 +2,13 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import NavBar from './components/NavBar'
-import ControlledExpansionPanels from './components/ControlledExpansionPanels'
+import PermanentDrawer from './components/PermanentDrawer';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <NavBar />
-          <ControlledExpansionPanels />
-        <footer>
-
-        </footer>
+        <PermanentDrawer/>
       </div>
     );
   }

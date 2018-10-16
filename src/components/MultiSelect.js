@@ -7,24 +7,25 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
+import FormHelperText from '@material-ui/core/FormHelperText';
+
 
 const styles = theme => ({
     root: {
         display: 'flex',
         flexWrap: 'wrap',
+        paddingLeft: 5,
     },
     formControl: {
         margin: theme.spacing.unit,
-        minWidth: 120,
-        maxWidth: 300,
+        minWidth: 150,
     },
-    chips: {
+    types: {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    chip: {
+    type: {
         margin: theme.spacing.unit / 4,
     },
 });
@@ -60,8 +61,8 @@ class MultipleSelect extends React.Component {
 
         return (
             <div className={classes.root}>
-                <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="select-multiple">Option List 1</InputLabel>
+                {/* <FormControl className={classes.formControl}>
+                    <InputLabel htmlFor="select-multiple">Instance</InputLabel>
                     <Select
                         multiple
                         value={this.state.name}
@@ -84,18 +85,18 @@ class MultipleSelect extends React.Component {
                             </MenuItem>
                         ))}
                     </Select>
-                </FormControl>
+                </FormControl> */}
                 <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="select-multiple-chip">Chip</InputLabel>
+                    <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
                     <Select
                         multiple
                         value={this.state.name}
                         onChange={this.handleChange}
-                        input={<Input id="select-multiple-chip" />}
+                        input={<Input id="select-multiple-type" />}
                         renderValue={selected => (
-                            <div className={classes.chips}>
+                            <div className={classes.types}>
                                 {selected.map(value => (
-                                    <Chip key={value} label={value} className={classes.chip} />
+                                    <Chip key={value} label={value} className={classes.type} />
                                 ))}
                             </div>
                         )}
@@ -116,6 +117,7 @@ class MultipleSelect extends React.Component {
                             </MenuItem>
                         ))}
                     </Select>
+                    <FormHelperText>Select Label</FormHelperText>
                 </FormControl>
             </div>
         );

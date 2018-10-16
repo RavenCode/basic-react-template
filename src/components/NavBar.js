@@ -165,7 +165,7 @@ class NavBar extends React.Component {
                         <Typography className={classes.title} variant="h6" color="inherit" noWrap>
                             design-react-template
                         </Typography>
-                        {/* <div className={classes.search}>
+                        <div className={classes.search}>
                             <div className={classes.searchIcon}>
                                 <SearchIcon />
                             </div>
@@ -176,7 +176,7 @@ class NavBar extends React.Component {
                                     input: classes.inputInput,
                                 }}
                             />
-                        </div> */}
+                        </div>
                         <div className={classes.grow} />
                         <div className={classes.sectionDesktop}>
                             <IconButton color="inherit">
