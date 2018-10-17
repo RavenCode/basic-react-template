@@ -19,7 +19,7 @@ const styles = theme => ({
     },
     formControl: {
         margin: theme.spacing.unit,
-        minWidth: 150,
+        minWidth: 200,
     },
     types: {
         display: 'flex',
@@ -119,7 +119,41 @@ class MultipleSelect extends React.Component {
                     </Select>
                     <FormHelperText>Select Label</FormHelperText>
                 </FormControl>
+                <FormControl className={classes.formControl}>
+                    <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
+                    <Select
+                        multiple
+                        value={this.state.name}
+                        onChange={this.handleChange}
+                        input={<Input id="select-multiple-type" />}
+                        renderValue={selected => (
+                            <div className={classes.types}>
+                                {selected.map(value => (
+                                    <Chip key={value} label={value} className={classes.type} />
+                                ))}
+                            </div>
+                        )}
+                        MenuProps={MenuProps}
+                    >
+                        {options.map(name => (
+                            <MenuItem
+                                key={name}
+                                value={name}
+                                style={{
+                                    fontWeight:
+                                        this.state.name.indexOf(name) === -1
+                                            ? theme.typography.fontWeightRegular
+                                            : theme.typography.fontWeightMedium,
+                                }}
+                            >
+                                {name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    <FormHelperText>Select Label</FormHelperText>
+                </FormControl>
             </div>
+
         );
     }
 }

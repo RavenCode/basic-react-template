@@ -10,12 +10,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
-import ControlledExpansionPanels from './ControlledExpansionPanels';
 import SearchIcon from '@material-ui/icons/Search';
 import InputBase from '@material-ui/core/InputBase';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import MultiSelect from './MultiSelect';
 import SingleSelect from './SingleSelect';
+// import NavBar from './NavBar';
 
 
 // import { mailFolderListItems, otherMailFolderListItems } from './tileData';
@@ -154,21 +154,22 @@ class PermanentDrawer extends React.Component {
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
-          <AppBar
+          {/* <AppBar
             position="absolute"
             className={classNames(classes.appBar, classes[`appBar-${anchor}`])}
           >
             <Toolbar>
               <Typography variant="h6" color="inherit" noWrap>
-                basic-react-template
+                RNG
               </Typography>
 
             </Toolbar>
-          </AppBar>
+          </AppBar> */}
+          {/* <NavBar /> */}
           {before}
           <main className={classes.content}>
             <div className={classes.toolbar} />
-            <ControlledExpansionPanels />
+            {/* <ControlledExpansionPanels /> */}
           </main>
           {after}
         </div>

@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import PermanentDrawer from './components/PermanentDrawer';
+import MainContainer from './components/MainContainer';
+
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <PermanentDrawer/>
+        <MainContainer />
       </div>
     );
   }
