@@ -16,9 +16,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 import { getAggregateInformation } from '../actions/AggregateAction'
+import { getInstanceInformation } from '../actions/InstanceAction'
 import { signalRInvokeMiddleware } from '../actions/SignalRAction'
 import * as SignalR from '@aspnet/signalr';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
+
+const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 
 function desc(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -59,7 +62,7 @@ class AggregateTableHead extends React.Component {
     };
 
     toggleFilters = property => event => {
-        
+
     };
 
     render() {
@@ -150,11 +153,11 @@ let AggregateTableToolbar = props => {
                         </IconButton>
                     </Tooltip>
                 ) : ( */}
-                        <Tooltip title="Filter list">
-                            <IconButton aria-label="Filter list">
-                                <FilterListIcon />
-                            </IconButton>
-                        </Tooltip>
+                <Tooltip title="Filter list">
+                    <IconButton aria-label="Filter list">
+                        <FilterListIcon />
+                    </IconButton>
+                </Tooltip>
                 {/*)}*/}
             </div>
         </Toolbar>
@@ -245,17 +248,28 @@ class AggregateTable extends React.Component {
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
     getAggregateInformation() {
-        return getAggregateInformation('44ercoGfO8Ipfypls2Zc', '0', '1')
+        return getAggregateInformation( INSTANCE_ID , '0', '1')
+    }
+
+    getInstanceInformation() {
+        return getInstanceInformation( INSTANCE_ID )
     }
 
     async componentDidMount() {
         try {
+            const instanceInfo = await this.getInstanceInformation();
+
+            // for (var i = 0; i < this.state.data.length; i++) {
+            //     if (this.state.data[i].aggID == aggregateId)
+            //         this.state.data[i].count = count;
+            // }
+            
             const hubConnection = new HubConnectionBuilder()
                 .withUrl('https://gocfire-alpha.appspot.com/api/Aggregation/counterhub')
                 .configureLogging(LogLevel.Information)
                 .build();
-            const results = await this.getAggregateInformation()
-            this.setState({ data: results })
+            const aggregateInfo = await this.getAggregateInformation()
+            this.setState({ data: aggregateInfo })
 
             this.setState({ hubConnection }, () => {
                 this.state.hubConnection
@@ -265,7 +279,7 @@ class AggregateTable extends React.Component {
 
                 this.state.hubConnection.on("SendCounterUpdate", (aggregateId, count) => {
                     console.log("received some stuff from signalR and it was " + aggregateId + " ; " + count);
-                    
+
                     // for (var i=0; i<this.state.data.length; i++)
                     // {
                     //     if (this.state.data[i].aggID == aggregateId)
@@ -333,8 +347,8 @@ class AggregateTable extends React.Component {
                                             <TableCell numeric>{n.count}</TableCell>
                                             <TableCell>{n.pinned}</TableCell>
                                         </TableRow>
-                                                            );
-                                                        })}
+                                    );
+                                })}
                             {emptyRows > 0 && (
                                 <TableRow style={{ height: 49 * emptyRows }}>
                                     <TableCell colSpan={6} />
