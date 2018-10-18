@@ -24,7 +24,7 @@ import EnvTypeSelect from './EnvTypeSelect'
 import AggregateTable from './AggregateTable'
 
 import { getAggregateInformation } from '../actions/AggregateAction'
-
+import { getErrors, getErrorsByAggregate } from '../actions/ErrorAction'
 import { getInstanceInformation } from '../actions/InstanceAction'
 
 const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
@@ -183,11 +183,9 @@ class MainContainer extends React.Component {
 
             this.setState({ instanceInfo: instanceInfo, aggregate1Name: instanceInfo.aggregateGroup1Name, aggregate2Name: instanceInfo.aggregateGroup2Name })
 
-            for (var i = 0; i < this.state.data.length; i++) {
+            for (var i = 0; i < instanceInfo.length; i++) {
                 this.state.data[i].aggValueId = this.state.aggregate1Name
             }
-
-
 
         } catch (e) {
             console.log(e)

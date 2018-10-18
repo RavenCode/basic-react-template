@@ -17,10 +17,12 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
 import { getAggregateInformation } from '../actions/AggregateAction'
 import { getInstanceInformation } from '../actions/InstanceAction'
+import { getAllErrors } from '../actions/ErrorAction'
 import { signalRInvokeMiddleware } from '../actions/SignalRAction'
 import * as SignalR from '@aspnet/signalr';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 import MultiSelect from './MultiSelect';
+import Modal from './Modal'
 
 const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 
@@ -49,7 +51,6 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-    { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
     { id: 'aggValueId', numeric: false, disablePadding: false, label: 'Aggregation Identifier' },
     { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Aggregation Preview' },
     { id: 'count', numeric: true, disablePadding: false, label: 'Count' },
@@ -236,6 +237,9 @@ class AggregateTable extends React.Component {
         }
 
         this.setState({ selected: newSelected });
+
+        // const errorCollection = await this.getErrors(INSTANCE_ID, 0, newSelected)
+        // console.log(errorCollection)
     };
 
     handleChangePage = (event, page) => {
@@ -256,9 +260,45 @@ class AggregateTable extends React.Component {
         return getInstanceInformation(INSTANCE_ID)
     }
 
+    getErrors = (event, id ) => {
+        let instanceData = {}
+        let instances = []
+        const { selected } = this.state;
+        const selectedIndex = selected.indexOf(id);
+        let newSelected = [];
+
+        if (selectedIndex === -1) {
+            newSelected = newSelected.concat(selected, id);
+        } else if (selectedIndex === 0) {
+            newSelected = newSelected.concat(selected.slice(1));
+        } else if (selectedIndex === selected.length - 1) {
+            newSelected = newSelected.concat(selected.slice(0, -1));
+        } else if (selectedIndex > 0) {
+            newSelected = newSelected.concat(
+                selected.slice(0, selectedIndex),
+                selected.slice(selectedIndex + 1),
+            );
+        }
+
+        fetch(('https://gocfire-alpha.appspot.com/api/Errors/' + INSTANCE_ID + '/' + 0 + '/' + newSelected), {
+            method: 'GET'
+        })
+                .then((resp) => {
+                    return resp.json()
+                })
+                .then((data) => {
+                    console.log(data)
+
+                    this.setState({ errorCollection: data })
+                })
+                .catch((error) => {
+                    console.log(error, "catch the hoop")
+                })
+    }
+
     async componentDidMount() {
         try {
-            const instanceInfo = await this.getInstanceInformation();
+            const instanceInfo = await this.getInstanceInformation()
             const aggregateInfo = await this.getAggregateInformation()
             this.setState({ data: aggregateInfo })
 
@@ -311,6 +351,9 @@ class AggregateTable extends React.Component {
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
         return (
+            <div>
+
+            <Modal />
             <Paper className={classes.root}>
                 <AggregateTableToolbar numSelected={selected.length} />
                 <div className={classes.tableWrapper}>
@@ -331,7 +374,7 @@ class AggregateTable extends React.Component {
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={event => this.handleClick(event, n.id)}
+                                            onClick={event => this.getErrors(event, n.id)}
                                             role="checkbox"
                                             aria-checked={isSelected}
                                             tabIndex={-1}
@@ -341,9 +384,6 @@ class AggregateTable extends React.Component {
                                             {/* <TableCell padding="checkbox">
                                                 Derp
                                             </TableCell> */}
-                                            <TableCell component="th" scope="row">
-                                                {n.id}
-                                            </TableCell>
                                             <TableCell>{n.aggValueId}</TableCell>
                                             <TableCell>{n.errorMessage}</TableCell>
                                             <TableCell numeric>{n.count}</TableCell>
@@ -353,7 +393,7 @@ class AggregateTable extends React.Component {
                                 })}
                             {emptyRows > 0 && (
                                 <TableRow style={{ height: 49 * emptyRows }}>
-                                    <TableCell colSpan={6} />
+                                    <TableCell colSpan={5} />
                                 </TableRow>
                             )}
                         </TableBody>
@@ -374,6 +414,8 @@ class AggregateTable extends React.Component {
                     onChangeRowsPerPage={this.handleChangeRowsPerPage}
                 />
             </Paper>
+            </div>
+
         );
     }
 }
