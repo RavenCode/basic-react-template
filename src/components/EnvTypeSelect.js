@@ -9,8 +9,6 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
-import { getInstances } from '../actions/InstanceAction'
-
 const styles = theme => ({
     root: {
         display: 'flex',
@@ -30,33 +28,12 @@ class SingleSelect extends React.Component {
     state = {
         val: 0,
         name: 'hai',
-        options: [],
-        instances: [],
+        data: [],
     };
 
     handleChange = event => {
         this.setState({ [event.target.name]: event.target.value });
     };
-
-    getInstances() {
-        return getInstances()
-    }
-
-    async componentDidMount() {
-        try {
-            const instances = await this.getInstances();
-
-            this.setState({ instances: instances})
-
-            for (var i = 0; i < this.state.instances.length; i++) {
-                this.state.options[i] = this.state.instances[i].name
-            }
-            console.log(this.state.options[0])
-
-        } catch (e) {
-            console.log(e)
-        }
-    }
 
     render() {
         const { classes } = this.props;
@@ -75,10 +52,11 @@ class SingleSelect extends React.Component {
                         <MenuItem value="">
                             <em>None</em>
                         </MenuItem>
-                        <MenuItem value={0}>{this.state.options[0]}</MenuItem>
-                        <MenuItem value={0}>{this.state.options[1]}</MenuItem>
+                        <MenuItem value={0}>DEV</MenuItem>
+                        <MenuItem value={1}>STAGE</MenuItem>
+                        <MenuItem value={2}>PROD</MenuItem>
                     </Select>
-                    <FormHelperText>Instance</FormHelperText>
+                    <FormHelperText>Environment</FormHelperText>
                 </FormControl>
             </form>
         );

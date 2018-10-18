@@ -8,8 +8,9 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import { getInstanceInformation } from '../actions/InstanceAction'
 
-
+const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 const styles = theme => ({
     root: {
         display: 'flex',
@@ -40,20 +41,35 @@ const MenuProps = {
     },
 };
 
-const options = [
-    'Option 1',
-    'Option 2',
-    'Option 3',
-];
-
 class MultipleSelect extends React.Component {
     state = {
         name: [],
+        options:[]
     };
 
     handleChange = event => {
         this.setState({ name: event.target.value });
     };
+
+    getInstanceInformation() {
+        return getInstanceInformation(INSTANCE_ID)
+    }
+
+    async componentDidMount() {
+        try {
+            const instanceInfo = await this.getInstanceInformation();
+            let ops = [];
+            ops.push(instanceInfo.aggregateGroup1Name)
+            ops.push(instanceInfo.aggregateGroup2Name)
+
+            this.setState({ options: ops })
+
+
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     render() {
         const { classes, theme } = this.props;
@@ -61,7 +77,6 @@ class MultipleSelect extends React.Component {
         return (
             <div className={classes.root}>
                 <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
                     <Select
                         multiple
                         value={this.state.name}
@@ -76,7 +91,7 @@ class MultipleSelect extends React.Component {
                         )}
                         MenuProps={MenuProps}
                     >
-                        {options.map(name => (
+                        {this.state.options.map(name => (
                             <MenuItem
                                 key={name}
                                 value={name}
@@ -91,40 +106,7 @@ class MultipleSelect extends React.Component {
                             </MenuItem>
                         ))}
                     </Select>
-                    <FormHelperText>Aggregate 1</FormHelperText>
-                </FormControl>
-                <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
-                    <Select
-                        multiple
-                        value={this.state.name}
-                        onChange={this.handleChange}
-                        input={<Input id="select-multiple-type" />}
-                        renderValue={selected => (
-                            <div className={classes.types}>
-                                {selected.map(value => (
-                                    <Chip key={value} label={value} className={classes.type} />
-                                ))}
-                            </div>
-                        )}
-                        MenuProps={MenuProps}
-                    >
-                        {options.map(name => (
-                            <MenuItem
-                                key={name}
-                                value={name}
-                                style={{
-                                    fontWeight:
-                                        this.state.name.indexOf(name) === -1
-                                            ? theme.typography.fontWeightRegular
-                                            : theme.typography.fontWeightMedium,
-                                }}
-                            >
-                                {name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    <FormHelperText>Aggregate 2</FormHelperText>
+                    <FormHelperText>Filter by Aggregate</FormHelperText>
                 </FormControl>
             </div>
 

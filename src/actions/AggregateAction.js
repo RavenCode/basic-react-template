@@ -56,5 +56,5 @@ export async function getAggregateInformation( instanceID, environmentType, aggr
 
 function createData(aggId, aggValue, aggValueId, errorMessage, count, pinned) {
     counter += 1;
-    return { id: aggId, aggValue, aggValueId, errorMessage, count, pinned };
+    return { id: aggId, aggValueId, errorMessage, count, pinned };
 }

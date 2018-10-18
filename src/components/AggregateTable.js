@@ -20,6 +20,7 @@ import { getInstanceInformation } from '../actions/InstanceAction'
 import { signalRInvokeMiddleware } from '../actions/SignalRAction'
 import * as SignalR from '@aspnet/signalr';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
+import MultiSelect from './MultiSelect';
 
 const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 
@@ -49,8 +50,7 @@ function getSorting(order, orderBy) {
 
 const rows = [
     { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
-    { id: 'aggValue', numeric: false, disablePadding: false, label: 'Aggregate Level' },
-    { id: 'aggValueId', numeric: false, disablePadding: false, label: 'Aggregation Value Identifier' },
+    { id: 'aggValueId', numeric: false, disablePadding: false, label: 'Aggregation Identifier' },
     { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Aggregation Preview' },
     { id: 'count', numeric: true, disablePadding: false, label: 'Count' },
     { id: 'pinned', numeric: false, disablePadding: false, label: 'Pin Icon Here' },
@@ -154,12 +154,11 @@ let AggregateTableToolbar = props => {
                     </Tooltip>
                 ) : ( */}
                 <Tooltip title="Filter list">
-                    <IconButton aria-label="Filter list">
-                        <FilterListIcon />
-                    </IconButton>
+                    <MultiSelect />
                 </Tooltip>
                 {/*)}*/}
             </div>
+            
         </Toolbar>
 
     );
@@ -195,6 +194,8 @@ class AggregateTable extends React.Component {
         page: 0,
         rowsPerPage: 10,
         hubConnection: null,
+        aggregate1Name: '',
+        aggregate2Name: ''
     };
 
     handleRequestSort = (event, property) => {
@@ -248,28 +249,30 @@ class AggregateTable extends React.Component {
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
     getAggregateInformation() {
-        return getAggregateInformation( INSTANCE_ID , '0', '1')
+        return getAggregateInformation(INSTANCE_ID, '0', '1')
     }
 
     getInstanceInformation() {
-        return getInstanceInformation( INSTANCE_ID )
+        return getInstanceInformation(INSTANCE_ID)
     }
 
     async componentDidMount() {
         try {
             const instanceInfo = await this.getInstanceInformation();
+            const aggregateInfo = await this.getAggregateInformation()
+            this.setState({ data: aggregateInfo })
 
-            // for (var i = 0; i < this.state.data.length; i++) {
-            //     if (this.state.data[i].aggID == aggregateId)
-            //         this.state.data[i].count = count;
-            // }
-            
+            this.setState({ aggregate1Name: instanceInfo.aggregateGroup1Name, aggregate2Name: instanceInfo.aggregateGroup2Name })
+
+            for (var i = 0; i < this.state.data.length; i++) {
+                this.state.data[i].aggValueId = this.state.aggregate1Name
+            }
+
             const hubConnection = new HubConnectionBuilder()
                 .withUrl('https://gocfire-alpha.appspot.com/api/Aggregation/counterhub')
                 .configureLogging(LogLevel.Information)
                 .build();
-            const aggregateInfo = await this.getAggregateInformation()
-            this.setState({ data: aggregateInfo })
+            
 
             this.setState({ hubConnection }, () => {
                 this.state.hubConnection
@@ -341,7 +344,6 @@ class AggregateTable extends React.Component {
                                             <TableCell component="th" scope="row">
                                                 {n.id}
                                             </TableCell>
-                                            <TableCell>{n.aggValue}</TableCell>
                                             <TableCell>{n.aggValueId}</TableCell>
                                             <TableCell>{n.errorMessage}</TableCell>
                                             <TableCell numeric>{n.count}</TableCell>

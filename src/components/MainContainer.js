@@ -20,9 +20,14 @@ import InputBase from '@material-ui/core/InputBase'
 
 import MultiSelect from './MultiSelect'
 import SingleSelect from './SingleSelect'
+import EnvTypeSelect from './EnvTypeSelect'
 import AggregateTable from './AggregateTable'
 
 import { getAggregateInformation } from '../actions/AggregateAction'
+
+import { getInstanceInformation } from '../actions/InstanceAction'
+
+const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 
 const drawerWidth = 240
 
@@ -148,7 +153,10 @@ class MainContainer extends React.Component {
     state = {
         open: false,
         anchor: 'left',
-        aggregates: []
+        aggregates: [],
+        instanceInfo: {},
+        aggregateName1:'',
+        aggregateName2:''
     };
 
     handleDrawerOpen = () => {
@@ -165,20 +173,26 @@ class MainContainer extends React.Component {
         })
     }
 
-    // getAggregateInformation() {
-    //     return getAggregateInformation( '44ercoGfO8Ipfypls2Zc', '0', '1' )
-    // }
+    getInstanceInformation() {
+        return getInstanceInformation(INSTANCE_ID)
+    }
 
-    // async componentDidMount() {
-    //     try {
-    //         const results = await this.getAggregateInformation()
-    //         this.setState({ aggregates: results })
+    async componentDidMount() {
+        try {
+            const instanceInfo = await this.getInstanceInformation();
 
-    //         console.log (this.state.aggregates)
-    //     } catch (e) {
-    //         console.log(e)
-    //     }
-    // }
+            this.setState({ instanceInfo: instanceInfo, aggregate1Name: instanceInfo.aggregateGroup1Name, aggregate2Name: instanceInfo.aggregateGroup2Name })
+
+            for (var i = 0; i < this.state.data.length; i++) {
+                this.state.data[i].aggValueId = this.state.aggregate1Name
+            }
+
+
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
 
     render() {
         const { classes, theme } = this.props;
@@ -200,7 +214,7 @@ class MainContainer extends React.Component {
                 </div>
                 <Divider />
                 <SingleSelect />
-                <SingleSelect />
+                <EnvTypeSelect />
                 <Divider />
             </Drawer>
         );
@@ -258,9 +272,6 @@ class MainContainer extends React.Component {
                         })}
                     >
                         <div className={classes.drawerHeader} />
-                        <Card>
-                            <MultiSelect />
-                        </Card>
                         <AggregateTable data={this.state.aggregates}/>
                     </main>
                     {after}
