@@ -5,7 +5,6 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -61,31 +60,6 @@ class MultipleSelect extends React.Component {
 
         return (
             <div className={classes.root}>
-                {/* <FormControl className={classes.formControl}>
-                    <InputLabel htmlFor="select-multiple">Instance</InputLabel>
-                    <Select
-                        multiple
-                        value={this.state.name}
-                        onChange={this.handleChange}
-                        input={<Input id="select-multiple" />}
-                        MenuProps={MenuProps}
-                    >
-                        {options.map(name => (
-                            <MenuItem
-                                key={name}
-                                value={name}
-                                style={{
-                                    fontWeight:
-                                        this.state.name.indexOf(name) === -1
-                                            ? theme.typography.fontWeightRegular
-                                            : theme.typography.fontWeightMedium,
-                                }}
-                            >
-                                {name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl> */}
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
                     <Select
@@ -117,7 +91,7 @@ class MultipleSelect extends React.Component {
                             </MenuItem>
                         ))}
                     </Select>
-                    <FormHelperText>Select Label</FormHelperText>
+                    <FormHelperText>Aggregate 1</FormHelperText>
                 </FormControl>
                 <FormControl className={classes.formControl}>
                     <InputLabel htmlFor="select-multiple-type">Type</InputLabel>
@@ -150,7 +124,7 @@ class MultipleSelect extends React.Component {
                             </MenuItem>
                         ))}
                     </Select>
-                    <FormHelperText>Select Label</FormHelperText>
+                    <FormHelperText>Aggregate 2</FormHelperText>
                 </FormControl>
             </div>
 

@@ -26,8 +26,9 @@ const styles = theme => ({
 
 class SingleSelect extends React.Component {
     state = {
-        age: '',
+        val: '',
         name: 'hai',
+        data: [],
     };
 
     handleChange = event => {

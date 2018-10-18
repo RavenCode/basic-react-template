@@ -13,15 +13,12 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Paper from '@material-ui/core/Paper';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { lighten } from '@material-ui/core/styles/colorManipulator';
-
-let counter = 0;
-function createData(aggId, hash, count, envType, errorType, errorMessage, timestamp) {
-    counter += 1;
-    return { id: aggId, hash, count, envType, errorType, errorMessage, timestamp };
-}
+import { getAggregateInformation } from '../actions/AggregateAction'
+import { signalRInvokeMiddleware } from '../actions/SignalRAction'
+import * as SignalR from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 
 function desc(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -48,18 +45,21 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-    { id: 'aggId', numeric: true, disablePadding: false, label: 'ID' },
-    { id: 'hash', numeric: false, disablePadding: false, label: 'Aggregate Hash' },
+    { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
+    { id: 'aggValue', numeric: false, disablePadding: false, label: 'Aggregate Level' },
+    { id: 'aggValueId', numeric: false, disablePadding: false, label: 'Aggregation Value Identifier' },
+    { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Aggregation Preview' },
     { id: 'count', numeric: true, disablePadding: false, label: 'Count' },
-    { id: 'envType', numeric: false, disablePadding: false, label: 'Environment Type' },
-    { id: 'errorType', numeric: false, disablePadding: false, label: 'Error Type' },
-    { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Error Message' },
-    { id: 'timestamp', numeric: false, disablePadding: false, label: 'Timestamp' },
+    { id: 'pinned', numeric: false, disablePadding: false, label: 'Pin Icon Here' },
 ];
 
 class AggregateTableHead extends React.Component {
     createSortHandler = property => event => {
         this.props.onRequestSort(event, property);
+    };
+
+    toggleFilters = property => event => {
+        
     };
 
     render() {
@@ -68,9 +68,6 @@ class AggregateTableHead extends React.Component {
         return (
             <TableHead>
                 <TableRow>
-                    {/* <TableCell padding="checkbox">
-                        ID
-                    </TableCell> */}
                     {rows.map(row => {
                         return (
                             <TableCell
@@ -146,21 +143,22 @@ let AggregateTableToolbar = props => {
         >
             <div className={classes.spacer} />
             <div className={classes.actions}>
-                {numSelected > 0 ? (
+                {/* {numSelected > 0 ? (
                     <Tooltip title="Delete">
                         <IconButton aria-label="Delete">
                             <DeleteIcon />
                         </IconButton>
                     </Tooltip>
-                ) : (
+                ) : ( */}
                         <Tooltip title="Filter list">
                             <IconButton aria-label="Filter list">
                                 <FilterListIcon />
                             </IconButton>
                         </Tooltip>
-                    )}
+                {/*)}*/}
             </div>
         </Toolbar>
+
     );
 };
 
@@ -177,35 +175,23 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 3,
     },
     table: {
-        minWidth: 1020,
+        // minWidth: 1020,
     },
     tableWrapper: {
         overflowX: 'auto',
     },
+    minColumnWidth: 10,
 });
 
 class AggregateTable extends React.Component {
     state = {
         order: 'asc',
-        orderBy: 'envType',
+        orderBy: 'count',
         selected: [],
-        data: [
-            createData(1, '123xyz', 305, 'PRD', 'NullPointerException', 'Message', ''),
-            createData(2, '123xyz', 452, 'STG', 'NullPointerException', 'Message', ''),
-            createData(3, '123xyz', 262, 'PRD', 'NullPointerException', 'Message', ''),
-            createData(4, '123xyz', 159, 'STG', 'NullPointerException', 'Message', ''),
-            createData(5, '123xyz', 356, 'PRD', 'NullPointerException', 'Message', ''),
-            createData(6, '123xyz', 408, 'STG', 'IOException', 'Message', ''),
-            createData(7, '123xyz', 237, 'PRD', 'IOException', 'Message', ''),
-            createData(8, '123xyz', 375, 'PRD', 'IOException', 'Message', ''),
-            createData(9, '123xyz', 518, 'STG', 'IOException', 'Message', ''),
-            createData(10, '123xyz', 392, 'STG', 'Exception', 'Message', ''),
-            createData(11, '123xyz', 318, 'STG', 'Exception', 'Message', ''),
-            createData(12, '123xyz', 360, 'STG', 'Exception', 'Message', ''),
-            createData(13, '123xyz', 437, 'STG', 'Exception', 'Message', ''),
-        ],
+        data: [],
         page: 0,
         rowsPerPage: 10,
+        hubConnection: null,
     };
 
     handleRequestSort = (event, property) => {
@@ -258,6 +244,50 @@ class AggregateTable extends React.Component {
 
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
+    getAggregateInformation() {
+        return getAggregateInformation('44ercoGfO8Ipfypls2Zc', '0', '1')
+    }
+
+    async componentDidMount() {
+        try {
+            const hubConnection = new HubConnectionBuilder()
+                .withUrl('https://gocfire-alpha.appspot.com/api/Aggregation/counterhub')
+                .configureLogging(LogLevel.Information)
+                .build();
+            const results = await this.getAggregateInformation()
+            this.setState({ data: results })
+
+            this.setState({ hubConnection }, () => {
+                this.state.hubConnection
+                    .start()
+                    .then(() => console.log('Connection started!'))
+                    .catch(err => console.log('Error while establishing connection :('));
+
+                this.state.hubConnection.on("SendCounterUpdate", (aggregateId, count) => {
+                    console.log("received some stuff from signalR and it was " + aggregateId + " ; " + count);
+                    
+                    // for (var i=0; i<this.state.data.length; i++)
+                    // {
+                    //     if (this.state.data[i].aggID == aggregateId)
+                    //         this.state.data[i].count = count;
+                    // }
+                });
+            });
+
+
+
+            // hubConnection.on("SendCounterUpdate", (user, message) => {
+            //     const encodedMsg = user + " says " + message;
+            //     const li = document.createElement("li");
+            //     li.textContent = encodedMsg;
+            //     document.getElementById("messagesList").appendChild(li);
+            // });
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+
     render() {
         const { classes } = this.props;
         const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
@@ -294,15 +324,14 @@ class AggregateTable extends React.Component {
                                             {/* <TableCell padding="checkbox">
                                                 Derp
                                             </TableCell> */}
-                                            <TableCell component="th" scope="row" numeric>
+                                            <TableCell component="th" scope="row">
                                                 {n.id}
                                             </TableCell>
-                                            <TableCell>{n.hash}</TableCell>
-                                            <TableCell numeric>{n.count}</TableCell>
-                                            <TableCell>{n.envType}</TableCell>
-                                            <TableCell>{n.errorType}</TableCell>
+                                            <TableCell>{n.aggValue}</TableCell>
+                                            <TableCell>{n.aggValueId}</TableCell>
                                             <TableCell>{n.errorMessage}</TableCell>
-                                            <TableCell>{n.timestamp}</TableCell>
+                                            <TableCell numeric>{n.count}</TableCell>
+                                            <TableCell>{n.pinned}</TableCell>
                                         </TableRow>
                                                             );
                                                         })}

@@ -1,30 +1,30 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import Card from '@material-ui/core/Card';
+import React from 'react'
+import PropTypes from 'prop-types'
+import classNames from 'classnames'
+import { withStyles } from '@material-ui/core/styles'
+import Drawer from '@material-ui/core/Drawer'
+import AppBar from '@material-ui/core/AppBar'
+import Toolbar from '@material-ui/core/Toolbar'
+import Typography from '@material-ui/core/Typography'
+import Divider from '@material-ui/core/Divider'
+import IconButton from '@material-ui/core/IconButton'
+import MenuIcon from '@material-ui/icons/Menu'
+import Card from '@material-ui/core/Card'
 
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
+import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 
-import SearchIcon from '@material-ui/icons/Search';
-import { fade } from '@material-ui/core/styles/colorManipulator';
-import InputBase from '@material-ui/core/InputBase';
+import SearchIcon from '@material-ui/icons/Search'
+import { fade } from '@material-ui/core/styles/colorManipulator'
+import InputBase from '@material-ui/core/InputBase'
 
-import MultiSelect from './MultiSelect';
-import SingleSelect from './SingleSelect';
-import Tabs from './Tabs';
-import ControlledExpansionPanels from './ControlledExpansionPanels';
-import AggregateTable from './AggregateTable';
+import MultiSelect from './MultiSelect'
+import SingleSelect from './SingleSelect'
+import AggregateTable from './AggregateTable'
 
-const drawerWidth = 240;
+import { getAggregateInformation } from '../actions/AggregateAction'
+
+const drawerWidth = 240
 
 const styles = theme => ({
     root: {
@@ -148,21 +148,37 @@ class MainContainer extends React.Component {
     state = {
         open: false,
         anchor: 'left',
+        aggregates: []
     };
 
     handleDrawerOpen = () => {
         this.setState({ open: true });
-    };
+    }
 
     handleDrawerClose = () => {
         this.setState({ open: false });
-    };
+    }
 
     handleChangeAnchor = event => {
         this.setState({
             anchor: event.target.value,
-        });
-    };
+        })
+    }
+
+    // getAggregateInformation() {
+    //     return getAggregateInformation( '44ercoGfO8Ipfypls2Zc', '0', '1' )
+    // }
+
+    // async componentDidMount() {
+    //     try {
+    //         const results = await this.getAggregateInformation()
+    //         this.setState({ aggregates: results })
+
+    //         console.log (this.state.aggregates)
+    //     } catch (e) {
+    //         console.log(e)
+    //     }
+    // }
 
     render() {
         const { classes, theme } = this.props;
@@ -189,13 +205,13 @@ class MainContainer extends React.Component {
             </Drawer>
         );
 
-        let before = null;
-        let after = null;
+        let before = null
+        let after = null
 
         if (anchor === 'left') {
-            before = drawer;
+            before = drawer
         } else {
-            after = drawer;
+            after = drawer
         }
 
         return (
@@ -245,7 +261,7 @@ class MainContainer extends React.Component {
                         <Card>
                             <MultiSelect />
                         </Card>
-                        <AggregateTable />
+                        <AggregateTable data={this.state.aggregates}/>
                     </main>
                     {after}
                 </div>
@@ -257,6 +273,6 @@ class MainContainer extends React.Component {
 MainContainer.propTypes = {
     classes: PropTypes.object.isRequired,
     theme: PropTypes.object.isRequired,
-};
+}
 
-export default withStyles(styles, { withTheme: true })(MainContainer);
+export default withStyles(styles, { withTheme: true })(MainContainer)

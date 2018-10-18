@@ -15,10 +15,6 @@ import InputBase from '@material-ui/core/InputBase';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import MultiSelect from './MultiSelect';
 import SingleSelect from './SingleSelect';
-// import NavBar from './NavBar';
-
-
-// import { mailFolderListItems, otherMailFolderListItems } from './tileData';
 
 const drawerWidth = 200;
 
