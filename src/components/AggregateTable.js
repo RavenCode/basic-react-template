@@ -22,7 +22,12 @@ import { signalRInvokeMiddleware } from '../actions/SignalRAction'
 import * as SignalR from '@aspnet/signalr';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
 import MultiSelect from './MultiSelect';
-import Modal from './Modal'
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
 
@@ -55,6 +60,12 @@ const rows = [
     { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Aggregation Preview' },
     { id: 'count', numeric: true, disablePadding: false, label: 'Count' },
     { id: 'pinned', numeric: false, disablePadding: false, label: 'Pin Icon Here' },
+];
+
+const rowsX = [
+    { id: 'typeId', numeric: false, disablePadding: false, label: 'Env Type ID' },
+    { id: 'errorType', numeric: false, disablePadding: false, label: 'Error Type' },
+    { id: 'errorMessage', numeric: false, disablePadding: false, label: 'Error Message' },
 ];
 
 class AggregateTableHead extends React.Component {
@@ -111,6 +122,60 @@ AggregateTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
+class AggregateTableHead2 extends React.Component {
+    createSortHandler = property => event => {
+        this.props.onRequestSort(event, property);
+    };
+
+    toggleFilters = property => event => {
+
+    };
+
+    render() {
+        const { onSelectAllClick, order, orderBy, numSelected, rowCount } = this.props;
+
+        return (
+            <TableHead>
+                <TableRow>
+                    {rowsX.map(row => {
+                        return (
+                            <TableCell
+                                key={row.id}
+                                numeric={row.numeric}
+                                padding={row.disablePadding ? 'none' : 'default'}
+                                sortDirection={orderBy === row.id ? order : false}
+                            >
+                                <Tooltip
+                                    title="Sort"
+                                    placement={row.numeric ? 'bottom-end' : 'bottom-start'}
+                                    enterDelay={300}
+                                >
+                                    <TableSortLabel
+                                        active={orderBy === row.id}
+                                        direction={order}
+                                        onClick={this.createSortHandler(row.id)}
+                                    >
+                                        {row.label}
+                                    </TableSortLabel>
+                                </Tooltip>
+                            </TableCell>
+                        );
+                    }, this)}
+                </TableRow>
+            </TableHead>
+        );
+    }
+}
+
+AggregateTableHead2.propTypes = {
+    numSelected: PropTypes.number.isRequired,
+    onRequestSort: PropTypes.func.isRequired,
+    onSelectAllClick: PropTypes.func.isRequired,
+    order: PropTypes.string.isRequired,
+    orderBy: PropTypes.string.isRequired,
+    rowCount: PropTypes.number.isRequired,
+};
+
 const toolbarStyles = theme => ({
     root: {
         paddingRight: theme.spacing.unit,
@@ -147,17 +212,9 @@ let AggregateTableToolbar = props => {
         >
             <div className={classes.spacer} />
             <div className={classes.actions}>
-                {/* {numSelected > 0 ? (
-                    <Tooltip title="Delete">
-                        <IconButton aria-label="Delete">
-                            <DeleteIcon />
-                        </IconButton>
-                    </Tooltip>
-                ) : ( */}
                 <Tooltip title="Filter list">
                     <MultiSelect />
                 </Tooltip>
-                {/*)}*/}
             </div>
             
         </Toolbar>
@@ -192,11 +249,14 @@ class AggregateTable extends React.Component {
         orderBy: 'count',
         selected: [],
         data: [],
+        errorCollection:[],
         page: 0,
         rowsPerPage: 10,
         hubConnection: null,
         aggregate1Name: '',
-        aggregate2Name: ''
+        aggregate2Name: '',
+        open: false,
+        currentAggregate: {}
     };
 
     handleRequestSort = (event, property) => {
@@ -237,9 +297,6 @@ class AggregateTable extends React.Component {
         }
 
         this.setState({ selected: newSelected });
-
-        // const errorCollection = await this.getErrors(INSTANCE_ID, 0, newSelected)
-        // console.log(errorCollection)
     };
 
     handleChangePage = (event, page) => {
@@ -294,6 +351,15 @@ class AggregateTable extends React.Component {
                 .catch((error) => {
                     console.log(error, "catch the hoop")
                 })
+
+                var errorCollection = this.state.errorCollection
+                console.log(errorCollection)
+                let aggregateData = {
+                    id: newSelected,
+                    errorCollection: errorCollection
+                }
+
+        this.setState({ open: true, currentAggregate: aggregateData });
     }
 
     async componentDidMount() {
@@ -322,38 +388,77 @@ class AggregateTable extends React.Component {
 
                 this.state.hubConnection.on("SendCounterUpdate", (aggregateId, count) => {
                     console.log("received some stuff from signalR and it was " + aggregateId + " ; " + count);
-
-                    // for (var i=0; i<this.state.data.length; i++)
-                    // {
-                    //     if (this.state.data[i].aggID == aggregateId)
-                    //         this.state.data[i].count = count;
-                    // }
                 });
             });
-
-
-
-            // hubConnection.on("SendCounterUpdate", (user, message) => {
-            //     const encodedMsg = user + " says " + message;
-            //     const li = document.createElement("li");
-            //     li.textContent = encodedMsg;
-            //     document.getElementById("messagesList").appendChild(li);
-            // });
 
         } catch (e) {
             console.log(e)
         }
     }
 
+    handleClose = () => {
+        this.setState({ open: false });
+    }
+
     render() {
         const { classes } = this.props;
-        const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+        const { data, order, orderBy, selected, rowsPerPage, page, errorCollection } = this.state;
         const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
+        const emptyRows2 = rowsPerPage - Math.min(rowsPerPage, errorCollection.length - page * rowsPerPage);
 
         return (
             <div>
-
-            <Modal />
+                <Dialog
+                    open={this.state.open}
+                    onClose={this.handleClose}
+                >
+                    <DialogTitle id="scroll-dialog-title">Aggregate - {this.state.currentAggregate.id}</DialogTitle>
+                    <DialogContent>
+                        <div className={classes.tableWrapper}>
+                            <Table className={classes.table} aria-labelledby="tableTitle">
+                                <AggregateTableHead2
+                                    numSelected={selected.length}
+                                    order={order}
+                                    orderBy={orderBy}
+                                    onSelectAllClick={this.handleSelectAllClick}
+                                    onRequestSort={this.handleRequestSort}
+                                    rowCount={errorCollection.length}
+                                />
+                                <TableBody>
+                                    {stableSort(errorCollection, getSorting(order, orderBy))
+                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map(x => {
+                                            const isSelected = this.isSelected(x.id);
+                                            return (
+                                                <TableRow
+                                                    hover
+                                                    role="checkbox"
+                                                    aria-checked={isSelected}
+                                                    tabIndex={-1}
+                                                    key={x.id}
+                                                    selected={isSelected}
+                                                >
+                                                    <TableCell>{x.typeId}</TableCell>
+                                                    <TableCell>{x.errorType}</TableCell>
+                                                    <TableCell>{x.errorMessage}</TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    {emptyRows2 > 0 && (
+                                        <TableRow style={{ height: 50 * emptyRows2 }}>
+                                            <TableCell colSpan={4} />
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClose} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             <Paper className={classes.root}>
                 <AggregateTableToolbar numSelected={selected.length} />
                 <div className={classes.tableWrapper}>

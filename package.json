@@ -11,7 +11,9 @@
     "@material-ui/icons": "^3.0.1",
     "ajv": "^6.5.4",
     "fetch": "^1.1.0",
+    "material-ui-next-responsive-table": "^0.4.7",
     "react": "^16.5.2",
+    "react-bootstrap": "^0.32.4",
     "react-dom": "^16.5.2",
     "react-redux": "^5.0.7",
     "react-scripts": "2.0.4"

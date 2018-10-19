@@ -24,7 +24,6 @@ import EnvTypeSelect from './EnvTypeSelect'
 import AggregateTable from './AggregateTable'
 
 import { getAggregateInformation } from '../actions/AggregateAction'
-import { getErrors, getErrorsByAggregate } from '../actions/ErrorAction'
 import { getInstanceInformation } from '../actions/InstanceAction'
 
 const INSTANCE_ID = '44ercoGfO8Ipfypls2Zc'
@@ -270,7 +269,7 @@ class MainContainer extends React.Component {
                         })}
                     >
                         <div className={classes.drawerHeader} />
-                        <AggregateTable data={this.state.aggregates}/>
+                        <AggregateTable/>
                     </main>
                     {after}
                 </div>
